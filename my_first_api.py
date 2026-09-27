@@ -40,3 +40,9 @@ def check_jobs(title: str="developer", location:str="dhaka"):
     else:
         return {"message": f"Searching for {title} jobs in {location}..."}
 
+@app.get("/search-jobs/{job_type}")
+def customer_search(job_type: str, location: str= "dhaka"):
+    if job_type == "backend" and location == "remote":
+        return {"status": "Jackpot! Remote backend job found."}
+    else:
+        return {"message": f"Looking for {job_type} roles in {location}..."}
