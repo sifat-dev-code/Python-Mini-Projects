@@ -32,3 +32,11 @@ def check_salary(experience_level: str):
     
     else:
         return {"error": "Level not found. Please use 'junior', 'mid', or 'senior' in the URL."}
+    
+@app.get("/jobs")
+def check_jobs(title: str="developer", location:str="dhaka"):
+    if title=="backend" and location == "remote":
+        return {"job_role": "Python Backend Engineer", "salary": "80k-1L BDT", "type": "Remote", "status": "Dream Job Unlocked"}
+    else:
+        return {"message": f"Searching for {title} jobs in {location}..."}
+
