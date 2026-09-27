@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-
+from typing import Optional
 print("🚀 Starting the Backend Server...")
 
 
@@ -46,3 +46,10 @@ def customer_search(job_type: str, location: str= "dhaka"):
         return {"status": "Jackpot! Remote backend job found."}
     else:
         return {"message": f"Looking for {job_type} roles in {location}..."}
+
+@app.get("/find-job")
+def find_job(title:str, location: Optional[str]= None):
+    if location:
+        return{"message": f"Searching for {title} jobs in {location}..."}
+    else:
+        return {"message": f"Searching for {title} jobs EVERYWHERE! "}
