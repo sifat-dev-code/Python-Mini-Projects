@@ -1,6 +1,18 @@
+from pydantic import BaseModel
 from fastapi import FastAPI
+
 from typing import Optional
+
+
+class UserCV(BaseModel):
+    
+    name: str
+    email: str
+    expected_salary: int
+    is_remote: bool = True
+    
 print("🚀 Starting the Backend Server...")
+
 
 
 app = FastAPI()
@@ -53,3 +65,7 @@ def find_job(title:str, location: Optional[str]= None):
         return{"message": f"Searching for {title} jobs in {location}..."}
     else:
         return {"message": f"Searching for {title} jobs EVERYWHERE! "}
+    
+@app.post("/submit-cv")
+def submit_cv(cv: UserCV):
+    return {"message": f"CV successfully received for {cv.name}", "salary_demand": cv.expected_salary, "remote_status": cv.is_remote}
