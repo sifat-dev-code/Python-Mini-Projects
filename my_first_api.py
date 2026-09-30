@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 from fastapi import FastAPI
+from fastapi import FastAPI, status
 
 from typing import Optional
 
@@ -16,8 +17,7 @@ class UserCV(BaseModel):
         if "@" not in value:
             raise ValueError("Email must contain @ symbol!")
         return value
-    
-    
+fake_cv_db = []
 print("🚀 Starting the Backend Server...")
 
 
@@ -73,6 +73,11 @@ def find_job(title:str, location: Optional[str]= None):
     else:
         return {"message": f"Searching for {title} jobs EVERYWHERE! "}
     
-@app.post("/submit-cv")
+@app.post("/submit-cv", status_code=status. HTTP_201_CREATED)
 def submit_cv(cv: UserCV):
+    fake_cv_db.append(cv.model_dump())
     return {"message": f"CV successfully received for {cv.name}", "salary_demand": cv.expected_salary, "remote_status": cv.is_remote}
+
+@app.get("/all-cvs")
+def get_all_cvs():
+    return {"total_cvs": len(fake_cv_db), "database": fake_cv_db}
