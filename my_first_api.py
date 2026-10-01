@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 from fastapi import FastAPI
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, HTTPException
 
 from typing import Optional
 
@@ -81,3 +81,10 @@ def submit_cv(cv: UserCV):
 @app.get("/all-cvs")
 def get_all_cvs():
     return {"total_cvs": len(fake_cv_db), "database": fake_cv_db}
+
+@app.get ("/cv/{user_email}")
+def get_single_cv (user_email:str):
+    for cv in fake_cv_db:
+        if cv ["email"]== user_email:
+            return cv
+    raise HTTPException (status_code=status.HTTP_404_NOT_FOUND, detail= f" no cv found for this email: {user_email} ")
