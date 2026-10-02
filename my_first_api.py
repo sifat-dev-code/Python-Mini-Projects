@@ -88,3 +88,11 @@ def get_single_cv (user_email:str):
         if cv ["email"]== user_email:
             return cv
     raise HTTPException (status_code=status.HTTP_404_NOT_FOUND, detail= f" no cv found for this email: {user_email} ")
+
+@app.delete ("/cv/{user_email}")
+def delete_cv (user_email:str):
+    for cv in fake_cv_db:
+        if cv["email"]== user_email:
+            fake_cv_db.remove(cv)
+            return {"message": f"CV for {user_email} deleted successfully!"}
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "Data Not Found")
