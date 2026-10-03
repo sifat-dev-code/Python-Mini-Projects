@@ -96,3 +96,12 @@ def delete_cv (user_email:str):
             fake_cv_db.remove(cv)
             return {"message": f"CV for {user_email} deleted successfully!"}
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "Data Not Found")
+
+
+@app.put("/cv/{user_email}")
+def updated_cv (user_email : str, new_cv : UserCV):
+    for cv in fake_cv_db:
+        if cv["email"] == user_email:
+            cv.update(new_cv.model_dump())
+            return {"Messege": f"CV for {user_email} Updated Successfully"}
+    raise HTTPException (status_code=status.HTTP_404_NOT_FOUND, detail= "CV not found")
