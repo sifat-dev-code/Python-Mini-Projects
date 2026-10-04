@@ -1,23 +1,9 @@
-from pydantic import BaseModel, Field, field_validator
 from fastapi import FastAPI
-from fastapi import FastAPI, status, HTTPException
-
-from typing import Optional
+from routers import cv_routes
 
 
-class UserCV(BaseModel):
-    
-    name: str = Field(min_lenght=3)
-    email: str
-    expected_salary: int= Field(gt=0)
-    is_remote: bool = True
-    @field_validator('email')
-    @classmethod
-    def validate_email(cls, value):
-        if "@" not in value:
-            raise ValueError("Email must contain @ symbol!")
-        return value
-fake_cv_db = []
+
+
 print("🚀 Starting the Backend Server...")
 
 
@@ -52,56 +38,5 @@ def check_salary(experience_level: str):
     else:
         return {"error": "Level not found. Please use 'junior', 'mid', or 'senior' in the URL."}
     
-@app.get("/jobs")
-def check_jobs(title: str="developer", location:str="dhaka"):
-    if title=="backend" and location == "remote":
-        return {"job_role": "Python Backend Engineer", "salary": "80k-1L BDT", "type": "Remote", "status": "Dream Job Unlocked"}
-    else:
-        return {"message": f"Searching for {title} jobs in {location}..."}
 
-@app.get("/search-jobs/{job_type}")
-def customer_search(job_type: str, location: str= "dhaka"):
-    if job_type == "backend" and location == "remote":
-        return {"status": "Jackpot! Remote backend job found."}
-    else:
-        return {"message": f"Looking for {job_type} roles in {location}..."}
-
-@app.get("/find-job")
-def find_job(title:str, location: Optional[str]= None):
-    if location:
-        return{"message": f"Searching for {title} jobs in {location}..."}
-    else:
-        return {"message": f"Searching for {title} jobs EVERYWHERE! "}
-    
-@app.post("/submit-cv", status_code=status. HTTP_201_CREATED)
-def submit_cv(cv: UserCV):
-    fake_cv_db.append(cv.model_dump())
-    return {"message": f"CV successfully received for {cv.name}", "salary_demand": cv.expected_salary, "remote_status": cv.is_remote}
-
-@app.get("/all-cvs")
-def get_all_cvs():
-    return {"total_cvs": len(fake_cv_db), "database": fake_cv_db}
-
-@app.get ("/cv/{user_email}")
-def get_single_cv (user_email:str):
-    for cv in fake_cv_db:
-        if cv ["email"]== user_email:
-            return cv
-    raise HTTPException (status_code=status.HTTP_404_NOT_FOUND, detail= f" no cv found for this email: {user_email} ")
-
-@app.delete ("/cv/{user_email}")
-def delete_cv (user_email:str):
-    for cv in fake_cv_db:
-        if cv["email"]== user_email:
-            fake_cv_db.remove(cv)
-            return {"message": f"CV for {user_email} deleted successfully!"}
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "Data Not Found")
-
-
-@app.put("/cv/{user_email}")
-def updated_cv (user_email : str, new_cv : UserCV):
-    for cv in fake_cv_db:
-        if cv["email"] == user_email:
-            cv.update(new_cv.model_dump())
-            return {"Messege": f"CV for {user_email} Updated Successfully"}
-    raise HTTPException (status_code=status.HTTP_404_NOT_FOUND, detail= "CV not found")
+app.include_router(cv_routes.router)
