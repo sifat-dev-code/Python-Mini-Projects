@@ -50,3 +50,13 @@ def updated_cv (user_email : str, new_cv : UserCV):
             cv.update(new_cv.model_dump())
             return {"Messege": f"CV for {user_email} Updated Successfully"}
     raise HTTPException (status_code=status.HTTP_404_NOT_FOUND, detail= "CV not found")
+
+@router.get("/search-cvs")
+def search_cvs (remote_only : bool =True, max_salary: int = 100000):
+    matched_cvs=[]
+    for cv in fake_cv_db:
+        if cv["is_remote"] == remote_only and cv ["expected_salary"]<=  max_salary:
+            matched_cvs.append(cv)
+    return matched_cvs
+    
+        
