@@ -1,14 +1,23 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field, field_validator
+from typing import  List
 
 # Eitai holo tomar notun boss, jeta app er bodole kaj korbe
 router = APIRouter()
+class Experience(BaseModel):
+    company : str
+    role : str
+    years : int 
+
+
 class UserCV(BaseModel):
     
     name: str = Field(min_lenght=3)
     email: str
     expected_salary: int= Field(gt=0)
     is_remote: bool = True
+    skills : List[str] = []
+    experience : List[Experience] = []
 
     @field_validator('email')
     @classmethod
