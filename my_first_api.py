@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from routers import cv_routes
+import models
+from database import engine
 
 
 
@@ -9,7 +11,7 @@ print("🚀 Starting the Backend Server...")
 
 
 app = FastAPI()
-
+models.Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 def home():
