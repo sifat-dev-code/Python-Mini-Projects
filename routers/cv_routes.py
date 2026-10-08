@@ -1,8 +1,11 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, Field, field_validator
 from typing import  List
+from sqlalchemy.orm import Session
+from database import get_db
+from models import DBCV
 
-# Eitai holo tomar notun boss, jeta app er bodole kaj korbe
+
 router = APIRouter()
 class Experience(BaseModel):
     company : str
@@ -28,13 +31,25 @@ class UserCV(BaseModel):
 fake_cv_db = []
 
 @router.post("/submit-cv", status_code=status. HTTP_201_CREATED)
-def submit_cv(cv: UserCV):
-    fake_cv_db.append(cv.model_dump())
-    return {"message": f"CV successfully received for {cv.name}", "salary_demand": cv.expected_salary, "remote_status": cv.is_remote}
+def submit_cv(cv: UserCV, db: Session=Depends(get_db)):
+    
+    #fake_cv_db.append(cv.model_dump())
+    #return {"message": f"CV successfully received for {cv.name}", "salary_demand": cv.expected_salary, "remote_status": cv.is_remote}
 
+    new_cv = DBCV(
+    name= cv.name,
+    email=cv.email,
+    expected_salary=cv.expected_salary,
+    is_remote=cv.is_remote   
+)
+    db.add(new_cv)
+    db.commit()    
+    db.refresh(new_cv)
+    return {"message": "CV Successfully Saved in Database!", "cv_id": new_cv.id}
 @router.get("/all-cvs")
-def get_all_cvs():
-    return {"total_cvs": len(fake_cv_db), "database": fake_cv_db}
+def get_all_cvs(db : Session=Depends(get_db)):
+    all_record = db.query(DBCV).all()
+    return {"total_cvs": len(all_record), "database": all_record}
 
 @router.get ("/cv/{user_email}")
 def get_single_cv (user_email:str):
