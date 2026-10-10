@@ -44,8 +44,12 @@ def submit_cv(cv: UserCV, db: Session=Depends(get_db)):
     db.refresh(new_cv)
     return {"message": "CV Successfully Saved in Database!", "cv_id": new_cv.id}
 @router.get("/all-cvs")
-def get_all_cvs(db : Session=Depends(get_db)):
-    all_record = db.query(DBCV).all()
+def get_all_cvs(db : Session=Depends(get_db), skip:int=0, limit:int=10):
+    total_cv = db.query(DBCV).count()
+    if limit>total_cv:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "You reached your limit")
+    all_record = db.query(DBCV).offset(skip).limit(limit).all()
+    
     return {"total_cvs": len(all_record), "database": all_record}
 
 
@@ -80,12 +84,10 @@ def updated_cv (cv_id : int, updated_data:UserCV, db : Session= Depends(get_db))
     
 
 @router.get("/search-cvs")
-def search_cvs (remote_only : bool =True, max_salary: int = 100000):
-    matched_cvs=[]
-    for cv in fake_cv_db:
-        if cv["is_remote"] == remote_only and cv ["expected_salary"]<=  max_salary:
-            matched_cvs.append(cv)
-    return matched_cvs
+def search_cvs (remote_only : bool =True, max_salary: int = 100000, db:Session = Depends(get_db)):
+    result = db.query(DBCV).filter(DBCV.is_remote==remote_only,DBCV. expected_salary <= max_salary).all()
+    return result
+    
     
 @router.get("/cv/{cv_id}")
 def get_single_CV(cv_id:int, db: Session=Depends(get_db)):
