@@ -1,17 +1,20 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from database import get_db
-from models import DBCV
-from schemas import UserCV, Experience
+from models import DBCV, User
+from schemas import UserCV, Experience, UserCreate
+import bcrypt
 
+def get_password_hash(password: str):
+    pwd_bytes = password.encode('utf-8')
+    hashed_bytes = bcrypt.hashpw(pwd_bytes, bcrypt.gensalt())
+    return hashed_bytes.decode('utf-8')
+def verify_password(plain_password: str, hashed_password: str):
+    
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 router = APIRouter()
 
-
-
-
-
-   
 fake_cv_db = []
 
 @router.post("/submit-cv", status_code=status. HTTP_201_CREATED)
@@ -64,9 +67,6 @@ def updated_cv (cv_id : int, updated_data:UserCV, db : Session= Depends(get_db))
     return cv_to_update
 
     
-            
-    
-
 @router.get("/search-cvs")
 def search_cvs (remote_only : bool =True, max_salary: int = 100000, db:Session = Depends(get_db)):
     result = db.query(DBCV).filter(DBCV.is_remote==remote_only,DBCV. expected_salary <= max_salary).all()
@@ -80,5 +80,31 @@ def get_single_CV(cv_id:int, db: Session=Depends(get_db)):
             raise HTTPException (status_code=status.HTTP_404_NOT_FOUND, detail= "CV not found")      
 
     return single_cv
-        
+
+@router.post("/register")
+def register_user(user_data: UserCreate, db: Session=Depends(get_db)):
+     reg_user = db.query(User).filter(User.email==user_data.email).first()
+     if reg_user :
+          raise HTTPException (status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered") 
+     hash_pwd = get_password_hash(user_data.password)
+     user_reg = User(
+          email = user_data.email,
+          hashed_password = hash_pwd
+     )
+     db.add(user_reg)
+     db.commit()
+     db.refresh(user_reg)
+     return {"message": "User created successfully", "email": user_data.email}
+@router.post("/login")
+def login_user(user_data:UserCreate, db:Session=Depends(get_db)):
+     reg_user = db.query(User).filter(User.email==user_data.email).first()
+     if not reg_user:
+          raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Credentials")
+     log_pass = verify_password(user_data.password,reg_user.hashed_password)
+     if log_pass is False:
+          raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Credentials")
+     return {"message": "Login Successful"}
+
+
+
     

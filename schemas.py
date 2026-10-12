@@ -21,3 +21,7 @@ class UserCV(BaseModel):
         if "@" not in value:
             raise ValueError("Email must contain @ symbol!")
         return value
+    
+class UserCreate(BaseModel):
+    email : str
+    password : str= Field(max_lenght=72)
