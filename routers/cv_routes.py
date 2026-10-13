@@ -4,6 +4,18 @@ from database import get_db
 from models import DBCV, User
 from schemas import UserCV, Experience, UserCreate
 import bcrypt
+from datetime import datetime, timedelta,timezone
+from jose import jwt
+
+SECRET_KEY = "shovo_super_secret_key_banna_123" 
+ALGORITHM = "HS256"
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    
+    expire = datetime.now(timezone.utc) + timedelta(minutes=30)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 def get_password_hash(password: str):
     pwd_bytes = password.encode('utf-8')
@@ -103,7 +115,10 @@ def login_user(user_data:UserCreate, db:Session=Depends(get_db)):
      log_pass = verify_password(user_data.password,reg_user.hashed_password)
      if log_pass is False:
           raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Credentials")
-     return {"message": "Login Successful"}
+     access_token = create_access_token(data={"sub": user_data.email})
+     return {"access_token": access_token, "token_type": "bearer"}
+
+
 
 
 
