@@ -6,11 +6,27 @@ from schemas import UserCV, Experience, UserCreate
 import bcrypt
 from datetime import datetime, timedelta,timezone
 from jose import jwt
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError
 
-SECRET_KEY = "shovo_super_secret_key_banna_123" 
+SECRET_KEY = "sifat_super_secret_key_banna_123" 
 ALGORITHM = "HS256"
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+def get_current_user(token:str=Depends(oauth2_scheme), db:Session =Depends(get_db)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms= [ALGORITHM])
+        email = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+    except JWTError:
+         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+    user = db.query(User).filter(User.email==email).first()
+    if user is None:
+         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+    return user
 def create_access_token(data: dict):
     to_encode = data.copy()
+
     
     expire = datetime.now(timezone.utc) + timedelta(minutes=30)
     to_encode.update({"exp": expire})
@@ -30,7 +46,7 @@ router = APIRouter()
 fake_cv_db = []
 
 @router.post("/submit-cv", status_code=status. HTTP_201_CREATED)
-def submit_cv(cv: UserCV, db: Session=Depends(get_db)):
+def submit_cv(cv: UserCV, db: Session=Depends(get_db), current_user= Depends(get_current_user)):
     
     new_cv = DBCV(
     name= cv.name,
@@ -108,14 +124,14 @@ def register_user(user_data: UserCreate, db: Session=Depends(get_db)):
      db.refresh(user_reg)
      return {"message": "User created successfully", "email": user_data.email}
 @router.post("/login")
-def login_user(user_data:UserCreate, db:Session=Depends(get_db)):
-     reg_user = db.query(User).filter(User.email==user_data.email).first()
+def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db:Session=Depends(get_db)):
+     reg_user = db.query(User).filter(User.email==form_data.username).first()
      if not reg_user:
           raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Credentials")
-     log_pass = verify_password(user_data.password,reg_user.hashed_password)
+     log_pass = verify_password(form_data.password,reg_user.hashed_password)
      if log_pass is False:
           raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Credentials")
-     access_token = create_access_token(data={"sub": user_data.email})
+     access_token = create_access_token(data={"sub": form_data.username})
      return {"access_token": access_token, "token_type": "bearer"}
 
 
