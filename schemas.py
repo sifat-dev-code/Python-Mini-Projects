@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel,EmailStr, Field, field_validator
 from typing import  List
 
 
@@ -23,5 +23,5 @@ class UserCV(BaseModel):
         return value
     
 class UserCreate(BaseModel):
-    email : str
+    email : EmailStr
     password : str= Field(max_lenght=72)

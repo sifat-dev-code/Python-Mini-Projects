@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from database import Base 
 
 class DBCV(Base):
@@ -8,6 +8,7 @@ class DBCV(Base):
     email = Column (String, unique= True)
     expected_salary = Column(Integer)
     is_remote = Column(Boolean, default=True)
+    owner_id = Column(Integer, ForeignKey("User.id"))
     
 class User(Base):
     __tablename__ = "User"

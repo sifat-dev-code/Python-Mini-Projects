@@ -46,13 +46,14 @@ router = APIRouter()
 fake_cv_db = []
 
 @router.post("/submit-cv", status_code=status. HTTP_201_CREATED)
-def submit_cv(cv: UserCV, db: Session=Depends(get_db), current_user= Depends(get_current_user)):
+def submit_cv(cv: UserCV, db: Session=Depends(get_db), current_user: User= Depends(get_current_user)):
     
     new_cv = DBCV(
     name= cv.name,
     email=cv.email,
     expected_salary=cv.expected_salary,
-    is_remote=cv.is_remote   
+    is_remote=cv.is_remote, 
+    owner_id = current_user.id  
 )
     db.add(new_cv)
     db.commit()    
@@ -134,7 +135,11 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db:Session=Depe
      access_token = create_access_token(data={"sub": form_data.username})
      return {"access_token": access_token, "token_type": "bearer"}
 
+@router.get("/my_cvs")
 
+def get_my_cvs(db:Session=Depends(get_db), current_user:User=Depends(get_current_user)):
+     find_user = db.query(DBCV).filter(DBCV.owner_id==current_user.id).all()
+     return find_user
 
 
 
