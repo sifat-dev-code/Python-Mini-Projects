@@ -141,6 +141,13 @@ def get_my_cvs(db:Session=Depends(get_db), current_user:User=Depends(get_current
      find_user = db.query(DBCV).filter(DBCV.owner_id==current_user.id).all()
      return find_user
 
-
-
-    
+@router.delete("/delete_cv/{cv_id}")
+def delete_my_cv(cv_id:int, db:Session=Depends(get_db), current_user:User=Depends(get_current_user)):
+     del_cv = db.query(DBCV).filter(DBCV.id==cv_id).first()
+     if del_cv is None:
+          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="CV not found")
+     if del_cv.owner_id != current_user.id:
+          raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform action")
+     db.delete(del_cv)
+     db.commit()
+     return {"message": "CV deleted successfully"}
