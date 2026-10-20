@@ -1,15 +1,26 @@
-# Python-Mini-Projects
-Welcome to my Python learning repository! This repo contains real-world, interactive CLI (Command Line Interface) mini-projects that I am building to master Python logic, functions, loops, and data structures.
+#  CV Management API (Production-Ready)
 
-##  Projects Included So Far:
-* **ATM Simulator:** A modular virtual ATM handling deposits, withdrawals, and live balance checks.
-* **SMART Contact Book:** A functional contact manager using Python Dictionaries to add and search contacts.
-* **Password Generator:** A dynamic and secure random password creator.
-* **Number Guessing Game:** A logic-based game to test while-loops and random module.
-* **Magic 8-Ball:** A fun fortune-teller script using random and time modules.
+A robust, secure, and fully deployed RESTful API built with **FastAPI** to manage Curriculum Vitae (CV) data. Engineered with a focus on real-world backend practices, including JWT authentication, relational database management, and cloud deployment.
 
-##  Tech Stack
-* **Language:** Python 3
-* **Concepts Mastered:** Functions (`def`), Dictionaries, Lists, Loops (`for`/`while`), Conditional Statements, f-strings, and Core Modules (`random`, `time`).
+## Live Demo
+**Swagger UI / API Docs:** [https://sifat-cv-api.onrender.com/docs](https://sifat-cv-api.onrender.com/docs)
+*(Note: As it is hosted on a free cloud instance, the server might take ~50 seconds to spin up if inactive.)*
 
-*Getting 1% better every single day! 
+## Tech Stack
+* **Framework:** FastAPI (Python)
+* **Database:** PostgreSQL (Cloud-hosted on Render)
+* **ORM:** SQLAlchemy
+* **Security:** JWT (JSON Web Tokens), Passlib (Bcrypt hashing)
+* **Deployment:** Render
+
+## Key Features
+* **JWT Authentication:** Secure user registration and login endpoints.
+* **CRUD Operations:** Complete Create, Read, Update, and Delete functionality for CV records.
+* **Data Ownership:** Route protection ensuring users can only modify or delete their own submitted CVs.
+* **Cloud Database Integration:** Fully migrated from local SQLite to a cloud-managed PostgreSQL database using `psycopg2`.
+* **Interactive Documentation:** Auto-generated Swagger UI for easy API testing and client integration.
+
+## Local Setup
+1. Clone the repository: `git clone <your-repo-link>`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Run the server: `uvicorn my_first_api:app --reload`
